@@ -1,0 +1,20 @@
+{
+  "name": "govee-electron",
+  "version": "1.0.0",
+  "description": "Electron app to control govee lights",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HuntingtonJ/govee-electron.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HuntingtonJ/govee-electron/issues"
+  },
+  "homepage": "https://github.com/HuntingtonJ/govee-electron#readme"
+}
