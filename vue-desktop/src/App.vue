@@ -1,15 +1,48 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div>
+    <LightDashboardTile
+      v-for="(device, index) in devices"
+      :key="index"
+      :device="device"
+    />
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import LightDashboardTile from './components/LightDashboardTile.vue'
 
 export default {
   name: 'App',
+  data() {
+    return {
+      devices: [],
+    }
+  },
   components: {
-    HelloWorld
+    LightDashboardTile
+  },
+  async created() {
+    let config = {
+      method: 'get',
+      url: 'https://developer-api.govee.com/v1/devices/',
+      headers: {
+        'Content-Type': 'application/json',
+        'Govee-API-Key': '492bc24d-a091-45a2-ac1d-08c54ce97570',
+        'Access-Control-Allow-Origin': '*',
+      },
+      withCredentials: true,
+    };
+    await this.axios(config)
+      .then((response) => {
+        this.devices = response.data.data.devices;
+        console.log(this.devices);
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+  },
+  methods: {
+
   }
 }
 </script>
