@@ -5,7 +5,7 @@
         <label class="switch">
             <input 
               type="checkbox" 
-              id="checkbox" 
+              id="checkbox1" 
               v-model="toggle"
               true-value="on"
               false-value="off" />
@@ -22,11 +22,23 @@
             step="10"
             class="rangeslider" 
             id="brightnessSlider"
-            v-model="brightness" />
+            v-model="brightness"
+            :disabled="toggle === 'off'" />
           <label for="brightnessSlider">{{brightness}}</label>
         </div>
 
-        <div class="slidecontainer">
+        <label class="switch">
+            <input 
+              type="checkbox" 
+              id="checkbox2" 
+              v-model="colorMode"
+              true-value="temp"
+              false-value="color" />
+            <span class="slider"></span>
+        </label>
+        <p>Mode: {{colorMode}}</p>
+
+        <div v-if="colorMode === 'temp'" class="slidecontainer">
           <p>Color Temp</p>
           <input 
             type="range" 
@@ -35,8 +47,19 @@
             step="1000"
             class="rangeslider" 
             id="colorTemSlider"
-            v-model="colorTemInKelvin" />
+            v-model="colorTemInKelvin"
+            :disabled="toggle === 'off'" />
           <label for="colorTemSlider">{{colorTemInKelvin}}</label>
+        </div>
+
+        <div v-else-if="colorMode ==='color'" class="colorpickercontainer">
+          <p>Color</p>
+          <input
+            type="color"
+            id="colorPicker"
+            class="colorPicker"
+            v-model="color" />
+          <label for="colorPicker">{{color}}</label>
         </div>
     </div>
 </template>
@@ -48,13 +71,14 @@ export default {
   },
   data() {
     return {
-      state: 0,
+      colorMode: "temp",
       configOn: {},
       configOff: {},
       online: false,
       toggle: "off",
       brightness: 0,
       colorTemInKelvin: 3100,
+      color: '#000000',
     }
   },
   watch: {
@@ -81,6 +105,10 @@ export default {
       if (this.toggle === 'on') {
         this.setColorTemp(val);
       }
+    },
+    color: function(val) {
+      console.log("Color: ", val);
+      this.setColor(val);
     }
   },
   mounted() {
@@ -91,7 +119,7 @@ export default {
   },
   methods: {
     async turnOn() {
-      console.log(this.configOn)
+      console.log("API key", process.env.GOVEE_API_KEY)
       let dataOn = JSON.stringify({
         'device': this.device.device,
         'model': this.device.model,
@@ -165,7 +193,27 @@ export default {
           this.online = properties[0].online;
           this.toggle = properties[1].powerState;
           this.brightness = properties[2].brightness;
-          this.colorTemInKelvin = properties[3].colorTemInKelvin;
+          if ('colorTemInKelvin' in properties[3]) {
+            this.colorTemInKelvin = properties[3].colorTemInKelvin;
+            this.colorMode = 'temp';
+          } else if ('color' in properties[3]) {
+            let color = properties[3].color;
+            let r = color.r.toString(16);
+            let g = color.g.toString(16);
+            let b = color.b.toString(16);
+            if (r.length < 2) {
+              r = `${0}${r}`;
+            }
+            if (g.length < 2) {
+              g = `${0}${g}`;
+            }
+            if (b.length < 2) {
+              b = `${0}${b}`;
+            }
+            this.color = `#${r}${g}${b}`;
+            this.colorMode = 'color';
+          }
+          
         })
         .catch((error) => {
           console.error(error);
@@ -227,6 +275,49 @@ export default {
           console.error(error);
         });
     },
+    async setColor(color) {
+      let dataColor = JSON.stringify({
+        'device': this.device.device,
+        'model': this.device.model,
+        'cmd': {
+          'name': 'color',
+          'value': this.hexToRGB(color),
+        }
+      });
+      let config = {
+        method: 'put',
+        url: 'https://developer-api.govee.com/v1/devices/control',
+        headers: {
+          'Content-Type': 'application/json',
+          'Govee-API-Key': '492bc24d-a091-45a2-ac1d-08c54ce97570',
+          'Access-Control-Allow-Origin': '*',
+        },
+        withCredentials: true,
+        data: dataColor,  
+      };
+      await this.axios(config)
+        .then((response) => {
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    hexToRGB(h) {
+      let r = 0, g = 0, b = 0;
+
+      r = parseInt(`${h[1]}${h[2]}`, 16);
+      g = parseInt(`${h[3]}${h[4]}`, 16);
+      b = parseInt(`${h[5]}${h[6]}`, 16);
+
+      const color = {
+        "r": r,
+        "g": g,
+        "b": b,
+      }
+      
+      return color;
+    },
   }
 }
 </script>
@@ -238,10 +329,12 @@ export default {
     padding: 0.5rem;
   }
 
-  .slider
-
   p {
     margin: 0rem 0rem 0.5rem 0rem;
+  }
+
+  .slidecontainer p { 
+    margin: 0rem;
   }
 
   /* The switch - the box around the slider */
