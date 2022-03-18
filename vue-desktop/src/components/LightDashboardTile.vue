@@ -1,6 +1,7 @@
 <template>
     <div id="dashboardtile">
         <p>{{device.deviceName}}</p>
+        <p>online: {{online}}</p>
         <label class="switch">
             <input 
               type="checkbox" 
@@ -11,6 +12,32 @@
             <span class="slider"></span>
         </label>
         <p>{{toggle}}</p>
+        
+        <div class="slidecontainer">
+          <p>Brightness %</p>
+          <input 
+            type="range" 
+            min="0" 
+            max="100"
+            step="10"
+            class="rangeslider" 
+            id="brightnessSlider"
+            v-model="brightness" />
+          <label for="brightnessSlider">{{brightness}}</label>
+        </div>
+
+        <div class="slidecontainer">
+          <p>Color Temp</p>
+          <input 
+            type="range" 
+            min="2000" 
+            max="9000"
+            step="1000"
+            class="rangeslider" 
+            id="colorTemSlider"
+            v-model="colorTemInKelvin" />
+          <label for="colorTemSlider">{{colorTemInKelvin}}</label>
+        </div>
     </div>
 </template>
 
@@ -24,7 +51,10 @@ export default {
       state: 0,
       configOn: {},
       configOff: {},
+      online: false,
       toggle: "off",
+      brightness: 0,
+      colorTemInKelvin: 3100,
     }
   },
   watch: {
@@ -39,11 +69,29 @@ export default {
         default:
           console.log('Invalid switch state: ', val);
       }
+    },
+    brightness: function(val) {
+      console.log(val);
+      if (this.toggle === 'on') {
+        this.setBrightness(val);
+      }
+    },
+    colorTemInKelvin: function(val) {
+      console.log(val);
+      if (this.toggle === 'on') {
+        this.setColorTemp(val);
+      }
     }
   },
   mounted() {
     console.log(this.device);
     if (this.device !== {}) {
+      this.getState();
+    }
+  },
+  methods: {
+    async turnOn() {
+      console.log(this.configOn)
       let dataOn = JSON.stringify({
         'device': this.device.device,
         'model': this.device.model,
@@ -52,14 +100,6 @@ export default {
           'value': 'on',
         }
       });
-      let dataOff = JSON.stringify({
-        'device': this.device.device,
-        'model': this.device.model,
-        'cmd': {
-          'name': 'turn',
-          'value': 'off',
-        }
-      })
       this.configOn = {
         method: 'put',
         url: 'https://developer-api.govee.com/v1/devices/control',
@@ -71,6 +111,23 @@ export default {
         withCredentials: true,
         data: dataOn,
       };
+      await this.axios(this.configOn)
+        .then((response) => {
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    async turnOff() {
+      let dataOff = JSON.stringify({
+        'device': this.device.device,
+        'model': this.device.model,
+        'cmd': {
+          'name': 'turn',
+          'value': 'off',
+        }
+      })
       this.configOff = {
         method: 'put',
         url: 'https://developer-api.govee.com/v1/devices/control',
@@ -82,21 +139,6 @@ export default {
         withCredentials: true,
         data: dataOff,
       }; 
-    }
-      
-  },
-  methods: {
-    async turnOn() {
-      console.log(this.configOn)
-      await this.axios(this.configOn)
-        .then((response) => {
-          console.log(response.data);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    },
-    async turnOff() {
       await this.axios(this.configOff)
         .then((response) => {
           console.log(response.data);
@@ -105,8 +147,85 @@ export default {
           console.error(error);
         });
     },
-    changeOn() {
+    async getState() {
+      let config = {
+        method: 'get',
+        url: `https://developer-api.govee.com/v1/devices/state?device=${this.device.device}&model=${this.device.model}`,
+        headers: { 
+          'Govee-API-Key': '492bc24d-a091-45a2-ac1d-08c54ce97570',
+          'Access-Control-Allow-Origin': '*',
+        }
+      }
 
+      await this.axios(config)
+        .then((response) => {
+          console.log(response.data.data.properties);
+          const properties = response.data.data.properties;
+
+          this.online = properties[0].online;
+          this.toggle = properties[1].powerState;
+          this.brightness = properties[2].brightness;
+          this.colorTemInKelvin = properties[3].colorTemInKelvin;
+        })
+        .catch((error) => {
+          console.error(error);
+        })
+    },
+    async setBrightness(brightness) {
+      let dataBrightness = JSON.stringify({
+        'device': this.device.device,
+        'model': this.device.model,
+        'cmd': {
+          'name': 'brightness',
+          'value': parseInt(brightness, 10),
+        }
+      });
+      let config = {
+        method: 'put',
+        url: 'https://developer-api.govee.com/v1/devices/control',
+        headers: {
+          'Content-Type': 'application/json',
+          'Govee-API-Key': '492bc24d-a091-45a2-ac1d-08c54ce97570',
+          'Access-Control-Allow-Origin': '*',
+        },
+        withCredentials: true,
+        data: dataBrightness,  
+      };
+      await this.axios(config)
+        .then((response) => {
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    async setColorTemp(colorTemp) {
+      let dataColorTemp = JSON.stringify({
+        'device': this.device.device,
+        'model': this.device.model,
+        'cmd': {
+          'name': 'colorTem',
+          'value': parseInt(colorTemp, 10),
+        }
+      });
+      let config = {
+        method: 'put',
+        url: 'https://developer-api.govee.com/v1/devices/control',
+        headers: {
+          'Content-Type': 'application/json',
+          'Govee-API-Key': '492bc24d-a091-45a2-ac1d-08c54ce97570',
+          'Access-Control-Allow-Origin': '*',
+        },
+        withCredentials: true,
+        data: dataColorTemp,  
+      };
+      await this.axios(config)
+        .then((response) => {
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     },
   }
 }
@@ -116,7 +235,13 @@ export default {
   #dashboardtile {
     border-style: solid;
     margin: 1rem;
-    padding: 1rem;
+    padding: 0.5rem;
+  }
+
+  .slider
+
+  p {
+    margin: 0rem 0rem 0.5rem 0rem;
   }
 
   /* The switch - the box around the slider */
@@ -172,4 +297,8 @@ export default {
     -ms-transform: translateX(26px);
     transform: translateX(26px);
   }
+
+  /* .brightnessSlider::-webkit-slider-thumb {
+    background: url('contrasticon.png');
+  } */
 </style>
