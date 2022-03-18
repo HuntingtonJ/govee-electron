@@ -1,67 +1,72 @@
 <template>
-    <div id="dashboardtile">
-        <p>{{device.deviceName}}</p>
-        <p>online: {{online}}</p>
-        <label class="switch">
-            <input 
-              type="checkbox" 
-              id="checkbox1" 
-              v-model="toggle"
-              true-value="on"
-              false-value="off" />
-            <span class="slider"></span>
-        </label>
-        <p>{{toggle}}</p>
-        
-        <div class="slidecontainer">
-          <p>Brightness %</p>
-          <input 
-            type="range" 
-            min="0" 
-            max="100"
-            step="10"
-            class="rangeslider" 
-            id="brightnessSlider"
-            v-model="brightness"
-            :disabled="toggle === 'off'" />
-          <label for="brightnessSlider">{{brightness}}</label>
-        </div>
-
-        <label class="switch">
-            <input 
-              type="checkbox" 
-              id="checkbox2" 
-              v-model="colorMode"
-              true-value="temp"
-              false-value="color" />
-            <span class="slider"></span>
-        </label>
-        <p>Mode: {{colorMode}}</p>
-
-        <div v-if="colorMode === 'temp'" class="slidecontainer">
-          <p>Color Temp</p>
-          <input 
-            type="range" 
-            min="2000" 
-            max="9000"
-            step="1000"
-            class="rangeslider" 
-            id="colorTemSlider"
-            v-model="colorTemInKelvin"
-            :disabled="toggle === 'off'" />
-          <label for="colorTemSlider">{{colorTemInKelvin}}</label>
-        </div>
-
-        <div v-else-if="colorMode ==='color'" class="colorpickercontainer">
-          <p>Color</p>
-          <input
-            type="color"
-            id="colorPicker"
-            class="colorPicker"
-            v-model="color" />
-          <label for="colorPicker">{{color}}</label>
-        </div>
+  <div id="dashboardtile">
+    <p style="display:inline-block; margin-right: 0.5rem">{{device.deviceName}}</p>
+    <button type="button" id="refresh" @click="getState">
+      🗘
+    </button>
+    <p>online: {{online}}</p>
+    <label class="switch">
+      <input 
+        type="checkbox" 
+        id="checkbox1" 
+        v-model="toggle"
+        true-value="on"
+        false-value="off" />
+      <span class="slider"></span>
+    </label>
+    <p>{{toggle}}</p>
+    
+    <div class="slidecontainer">
+      <p>Brightness %</p>
+      <input 
+        type="range" 
+        min="0" 
+        max="100"
+        step="10"
+        class="rangeslider" 
+        id="brightnessSlider"
+        v-model="brightness"
+        :disabled="toggle === 'off'" />
+      <label for="brightnessSlider">{{brightness}}</label>
     </div>
+
+    <div id="colorModeDiv">
+      <label class="switch">
+        <input 
+          type="checkbox" 
+          id="checkbox2" 
+          v-model="colorMode"
+          true-value="temp"
+          false-value="color" />
+        <span class="slider"></span>
+      </label>
+      <p>Mode: {{colorMode}}</p>
+
+      <div v-if="colorMode === 'temp'" class="slidecontainer">
+        <p>Color Temp</p>
+        <input 
+          type="range" 
+          min="2000" 
+          max="9000"
+          step="1000"
+          class="rangeslider" 
+          id="colorTemSlider"
+          v-model="colorTemInKelvin"
+          :disabled="toggle === 'off'" />
+        <label for="colorTemSlider">{{colorTemInKelvin}}</label>
+      </div>
+
+      <div v-else-if="colorMode ==='color'" class="colorpickercontainer">
+        <p>Color</p>
+        <input
+          type="color"
+          id="colorPicker"
+          class="colorPicker"
+          v-model="color" />
+        <label for="colorPicker">{{color}}</label>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -329,12 +334,22 @@ export default {
     padding: 0.5rem;
   }
 
+  #colorModeDiv {
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-style: solid;
+  }
+
   p {
     margin: 0rem 0rem 0.5rem 0rem;
   }
 
   .slidecontainer p { 
     margin: 0rem;
+  }
+
+  #refresh {
+    display: inline-block;
   }
 
   /* The switch - the box around the slider */
