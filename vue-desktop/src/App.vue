@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="main-container">
     <LightDashboardTile
       v-for="(device, index) in devices"
       :key="index"
@@ -55,5 +55,10 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+#main-container {
+  background-color: rgb(67, 67, 67);
+  padding: 0.5rem;
 }
 </style>

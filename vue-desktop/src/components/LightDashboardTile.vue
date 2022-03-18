@@ -329,15 +329,18 @@ export default {
 
 <style scoped>
   #dashboardtile {
-    border-style: solid;
     margin: 1rem;
     padding: 0.5rem;
+    background-color: darkslategray;
+    color: floralwhite;
+    border-radius: 0.5rem;
   }
 
   #colorModeDiv {
     margin: 0.5rem;
     padding: 0.5rem;
-    border-style: solid;
+    background-color: lightslategray;
+    border-radius: 0.5rem;
   }
 
   p {
