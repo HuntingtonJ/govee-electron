@@ -62,7 +62,8 @@
           type="color"
           id="colorPicker"
           class="colorPicker"
-          v-model="color" />
+          v-model="color"
+          :disabled="toggle === 'off'" />
         <label for="colorPicker">{{color}}</label>
       </div>
     </div>
