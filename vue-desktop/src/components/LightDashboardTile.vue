@@ -123,29 +123,13 @@ export default {
       this.getState();
     }
   },
+  created() {
+    this.getState();
+    this.timer = setTimeout(this.getState, 5000);
+  },
   methods: {
     async turnOn() {
-      console.log("API key", process.env.GOVEE_API_KEY)
-      let dataOn = JSON.stringify({
-        'device': this.device.device,
-        'model': this.device.model,
-        'cmd': {
-          'name': 'turn',
-          'value': 'on',
-        }
-      });
-      this.configOn = {
-        method: 'put',
-        url: 'https://developer-api.govee.com/v1/devices/control',
-        headers: {
-          'Content-Type': 'application/json',
-          'Govee-API-Key': '492bc24d-a091-45a2-ac1d-08c54ce97570',
-          'Access-Control-Allow-Origin': '*',
-        },
-        withCredentials: true,
-        data: dataOn,
-      };
-      await this.axios(this.configOn)
+      await this.$govee.turnOn(this.device.device, this.device.model)
         .then((response) => {
           console.log(response.data);
         })
@@ -154,26 +138,7 @@ export default {
         });
     },
     async turnOff() {
-      let dataOff = JSON.stringify({
-        'device': this.device.device,
-        'model': this.device.model,
-        'cmd': {
-          'name': 'turn',
-          'value': 'off',
-        }
-      })
-      this.configOff = {
-        method: 'put',
-        url: 'https://developer-api.govee.com/v1/devices/control',
-        headers: {
-          'Content-Type': 'application/json',
-          'Govee-API-Key': '492bc24d-a091-45a2-ac1d-08c54ce97570',
-          'Access-Control-Allow-Origin': '*',
-        },
-        withCredentials: true,
-        data: dataOff,
-      }; 
-      await this.axios(this.configOff)
+      await this.$govee.turnOff(this.device.device, this.device.model)
         .then((response) => {
           console.log(response.data);
         })
@@ -182,16 +147,7 @@ export default {
         });
     },
     async getState() {
-      let config = {
-        method: 'get',
-        url: `https://developer-api.govee.com/v1/devices/state?device=${this.device.device}&model=${this.device.model}`,
-        headers: { 
-          'Govee-API-Key': '492bc24d-a091-45a2-ac1d-08c54ce97570',
-          'Access-Control-Allow-Origin': '*',
-        }
-      }
-
-      await this.axios(config)
+      await this.$govee.state(this.device.device, this.device.model)
         .then((response) => {
           console.log(response.data.data.properties);
           const properties = response.data.data.properties;
@@ -226,26 +182,7 @@ export default {
         })
     },
     async setBrightness(brightness) {
-      let dataBrightness = JSON.stringify({
-        'device': this.device.device,
-        'model': this.device.model,
-        'cmd': {
-          'name': 'brightness',
-          'value': parseInt(brightness, 10),
-        }
-      });
-      let config = {
-        method: 'put',
-        url: 'https://developer-api.govee.com/v1/devices/control',
-        headers: {
-          'Content-Type': 'application/json',
-          'Govee-API-Key': '492bc24d-a091-45a2-ac1d-08c54ce97570',
-          'Access-Control-Allow-Origin': '*',
-        },
-        withCredentials: true,
-        data: dataBrightness,  
-      };
-      await this.axios(config)
+      await this.$govee.brightness(this.device.device, this.device.model, parseInt(brightness, 10))
         .then((response) => {
           console.log(response.data);
         })
@@ -254,26 +191,7 @@ export default {
         });
     },
     async setColorTemp(colorTemp) {
-      let dataColorTemp = JSON.stringify({
-        'device': this.device.device,
-        'model': this.device.model,
-        'cmd': {
-          'name': 'colorTem',
-          'value': parseInt(colorTemp, 10),
-        }
-      });
-      let config = {
-        method: 'put',
-        url: 'https://developer-api.govee.com/v1/devices/control',
-        headers: {
-          'Content-Type': 'application/json',
-          'Govee-API-Key': '492bc24d-a091-45a2-ac1d-08c54ce97570',
-          'Access-Control-Allow-Origin': '*',
-        },
-        withCredentials: true,
-        data: dataColorTemp,  
-      };
-      await this.axios(config)
+      await this.$govee.colorTemp(this.device.device, this.device.model, parseInt(colorTemp, 10))
         .then((response) => {
           console.log(response.data);
         })
@@ -282,47 +200,13 @@ export default {
         });
     },
     async setColor(color) {
-      let dataColor = JSON.stringify({
-        'device': this.device.device,
-        'model': this.device.model,
-        'cmd': {
-          'name': 'color',
-          'value': this.hexToRGB(color),
-        }
-      });
-      let config = {
-        method: 'put',
-        url: 'https://developer-api.govee.com/v1/devices/control',
-        headers: {
-          'Content-Type': 'application/json',
-          'Govee-API-Key': '492bc24d-a091-45a2-ac1d-08c54ce97570',
-          'Access-Control-Allow-Origin': '*',
-        },
-        withCredentials: true,
-        data: dataColor,  
-      };
-      await this.axios(config)
+      await this.$govee.color(this.device.device, this.device.model, color)
         .then((response) => {
           console.log(response.data);
         })
         .catch((error) => {
           console.error(error);
         });
-    },
-    hexToRGB(h) {
-      let r = 0, g = 0, b = 0;
-
-      r = parseInt(`${h[1]}${h[2]}`, 16);
-      g = parseInt(`${h[3]}${h[4]}`, 16);
-      b = parseInt(`${h[5]}${h[6]}`, 16);
-
-      const color = {
-        "r": r,
-        "g": g,
-        "b": b,
-      }
-      
-      return color;
     },
   }
 }
