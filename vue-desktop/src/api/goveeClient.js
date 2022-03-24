@@ -5,9 +5,23 @@ export default class GoveeClient {
       this.api_key = api_key;
       this.baseURL = 'https://developer-api.govee.com'
       this.routes = {
+        DEVICES: '/v1/devices',
         STATE: '/v1/devices/state',
         CONTROL: '/v1/devices/control'
       }
+  }
+
+  async devices() {
+    let response = null;
+    let config = this.createAxiosConfig('get', this.routes.DEVICES, {}, {});
+
+    try {
+      response = await axios(config);
+    } catch(error) {
+      console.error("Govee state error: ", error);
+    }
+
+    return response;
   }
 
   async state(device, model) {
@@ -142,6 +156,7 @@ export default class GoveeClient {
         'Govee-API-Key': '492bc24d-a091-45a2-ac1d-08c54ce97570',
         'Access-Control-Allow-Origin': '*',
       },
+      withCredentials: true,
       data: cmd,
     }
 

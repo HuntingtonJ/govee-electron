@@ -22,17 +22,7 @@ export default {
     LightDashboardTile
   },
   async created() {
-    let config = {
-      method: 'get',
-      url: 'https://developer-api.govee.com/v1/devices/',
-      headers: {
-        'Content-Type': 'application/json',
-        'Govee-API-Key': '492bc24d-a091-45a2-ac1d-08c54ce97570',
-        'Access-Control-Allow-Origin': '*',
-      },
-      withCredentials: true,
-    };
-    await this.axios(config)
+    await this.$govee.devices()
       .then((response) => {
         this.devices = response.data.data.devices;
         console.log(this.devices);

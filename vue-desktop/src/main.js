@@ -7,6 +7,6 @@ import goveeClientPlugin from './plugins/goveeClientPlugin.js';
 const app = createApp(App);
 app.use(VueAxios, axios);
 app.use(goveeClientPlugin, {
-    apiKey: '492bc24d-a091-45a2-ac1d-08c54ce97570',
+    apiKey: process.env.API_KEY,
 })
 app.mount('#app');
