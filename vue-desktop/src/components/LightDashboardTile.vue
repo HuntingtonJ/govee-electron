@@ -12,7 +12,7 @@
         v-model="toggle"
         true-value="on"
         false-value="off" />
-      <span class="slider"></span>
+      <span id="slider1" class="slider"></span>
     </label>
     <p>{{toggle}}</p>
     
@@ -36,9 +36,9 @@
           type="checkbox" 
           id="checkbox2" 
           v-model="colorMode"
-          true-value="temp"
-          false-value="color" />
-        <span class="slider"></span>
+          true-value="color"
+          false-value="temp" />
+        <span id="slider2" class="slider"></span>
       </label>
       <p>Mode: {{colorMode}}</p>
 
@@ -124,8 +124,7 @@ export default {
     }
   },
   created() {
-    this.getState();
-    this.timer = setTimeout(this.getState, 5000);
+
   },
   methods: {
     async turnOn() {
@@ -280,11 +279,26 @@ export default {
     transition: .4s;
   }
 
-  input:checked + .slider {
-    background-color: #2196F3;
+  input:checked + #slider1.slider {
+    background-color: #21f321;
   }
 
-  input:focus + .slider {
+  input:focus + #slider1.slider {
+    box-shadow: 0 0 1px #21f321;
+  }
+
+  input:not(:checked) + #slider2.slider {
+    background: linear-gradient(rgb(255, 255, 182), rgb(213, 245, 255))
+  }
+
+  input:checked + #slider2.slider {
+    background:
+      linear-gradient(217deg, rgba(255,0,0,.8), rgba(255,0,0,0) 70.71%),
+      linear-gradient(127deg, rgba(0,255,0,.8), rgba(0,255,0,0) 70.71%),
+      linear-gradient(336deg, rgba(0,0,255,.8), rgba(0,0,255,0) 70.71%);
+  }
+
+  input:focus + #slider2.slider {
     box-shadow: 0 0 1px #2196F3;
   }
 
